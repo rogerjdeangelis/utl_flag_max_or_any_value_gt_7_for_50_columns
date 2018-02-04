@@ -12,7 +12,7 @@ Flag max or any value gt 7 for 50 columns. Keywords: sas sql join merge big data
        4.03  MEANS - DATASTEP with sasfile (1.77,2.24) CORRECTION
        4.08  IML (just the in memory 'bv = (x=x[,<>] | x>7)' see below;
        4.77  PROC SQL with data in memory (sasfile)
-       6.18  MEANS - DATASTEP (common solution) means(2,75) datastep (3.42)
+       6.18  MEANS - DATASTEP (common solution) means(2.75) datastep (3.42)
        6.21  PROC SQL disk
      * 8.00  R Suprising?  (In memory time not input and output time)
              The output of apply has to be reshaped for output to SAS/WPS
