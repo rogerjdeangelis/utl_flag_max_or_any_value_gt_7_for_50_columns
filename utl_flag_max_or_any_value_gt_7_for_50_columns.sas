@@ -17,7 +17,7 @@ Flag max or any value gt 7 for 50 columns
 https://stackoverflow.com/questions/48560769/compare-value-to-max-of-variable
 
 For each line and each variable, I want to know if the value is equal to
-the max for this variable or more than or equal to 7.
+the max for this variable or greater than 7.
 
 
 INPUT  (real data has 50 variables)
