@@ -1,18 +1,17 @@
 Flag max or any value gt 7 for 50 columns
-
-   Two Solutions
-        1. SAS
-        2. WPS/PROC R or SAS/IML/R
         
   Benchmarks (no parallelization I have slow ddr2 memory)
   could be cache data I did run twice on each)
 
+   4.03  MEANS - DATASTEP with sasfile (1.77,2.24) CORRECTION
+   4.08  IML (just the in memory 'bv = (x=x[,<>] | x>7)' see below;
    4.77  PROC SQL with data in memory (sasfile)
+   6.18  MEANS - DATASTEP (common solution) means(2,75) datastep (3.42)
    6.21  PROC SQL disk
-   5.40  MEANS - DATASTEP with sasfile
-   6.18  MEANS - DATASTEP (common solution) means(2.75) datastep (3.42)
- * 8.00  R Suprising?
-
+ * 8.00  R Suprising?  (In memory time not input and output time)
+         The output of apply has to be reshaped for output to SAS/WPS
+         (very slow to read and write SAS datasets but very fast to read and write binary floats)
+         (I am a not the strongest R programmer/)
 
 https://stackoverflow.com/questions/48560769/compare-value-to-max-of-variable
 
@@ -181,11 +180,16 @@ I have 8 codes, 64gb , twin 3gz XEONS and slow DDR2 memory.
 Benchmarks (no parallelization I have slow ddr2 memory)
   could be cache data I did run twice on each)
 
+   4.03  MEANS - DATASTEP with sasfile (1.77,2.24) CORRECTION
+   4.08  IML (just the in memory 'bv = (x=x[,<>] | x>7)' see below;
    4.77  PROC SQL with data in memory (sasfile)
+   6.18  MEANS - DATASTEP (common solution) means(2,75) datastep (3.42)
    6.21  PROC SQL disk
-   5.40  MEANS - DATASTEP with sasfile
-   6.18  MEANS - DATASTEP (common solution) means(2.75) datastep (3.42)
- * 8.00  R Suprising?
+ * 8.00  R Suprising?  (In memory time not input and output time)
+         The output of apply has to be reshaped for output to SAS/WPS
+         (very slow to read and write SAS datasets but very fast to read and write binary floats)
+         (I am a not the strongest R programmer/)
+
 
  Surprising
 
@@ -334,6 +338,151 @@ NOTE: DATA statement used (Total process time):
 SYMBOLGEN:  Macro variable BEG resolves to 46163.6349999904
 1728  %put %sysevalf((%sysfunc(time()) - &beg));
 5.40199995040166
+
+
+Paul your code is now the fastest
+
+Benchmarks  ( little odd because we do no no summizations just moving and
+              comparing memory. My DDR2 ram is he bottleneck for me?)
+
+Correction Pauls dataset now uses the in memory have dataset
+
+   Seconds
+
+   4.03  MEANS - DATASTEP with sasfile (1.77,2.24) CORRECTION
+   4.08  IML (just the in memory 'bv = (x=x[,<>] | x>7)' see below;
+   4.77  PROC SQL with data in memory (sasfile)
+   6.18  MEANS - DATASTEP (common solution) means(2,75) datastep (3.42)
+   6.21  PROC SQL disk
+ * 8.00  R Suprising?  (In memory time not input and output time)
+         The output of apply has to be reshaped for output to SAS/WPS
+         (very slow to read and write SAS datasets but very fast to read and write binary floats)
+         (I am a not the strongest R programmer/)
+
+*                  _
+ _ __   __ _ _   _| |
+| '_ \ / _` | | | | |
+| |_) | (_| | |_| | |
+| .__/ \__,_|\__,_|_|
+|_|
+;
+
+sasfile sd1.have load;
+
+%let beg= %sysfunc(time());
+proc means noprint data = sd1.have ;
+  var v: ;
+  output out = vmax (drop=_:) max= / autoname ;
+run ;
+
+data want (keep = id bv:) ;
+  if _n_ = 1 then set vmax ;
+  array vm v: ;
+  set sd1.have ;          *** CHANGED THIS TO SD1.HAVE ****;
+  array v   v1- v&Nvar ;
+  array bv bv1-bv&Nvar ;
+  do over v ;
+    bv = (v = vm or v > 7) ;
+  end ;
+run ;
+%put %sysevalf((%sysfunc(time()) - &beg));
+
+sasfile sd1.have close;
+
+2232  sasfile sd1.have load;
+NOTE: The file SD1.HAVE.DATA has been loaded into memory by the SASFILE statement.
+2233  %let beg= %sysfunc(time());
+2234  proc means noprint data = sd1.have ;
+2235    var v: ;
+2236    output out = vmax (drop=_:) max= / autoname ;
+2237  run ;
+
+NOTE: There were 1000000 observations read from the data set SD1.HAVE.
+NOTE: The data set WORK.VMAX has 1 observations and 50 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           1.77 seconds
+      user cpu time       5.91 seconds
+      system cpu time     0.12 seconds
+      memory              5807.84k
+      OS Memory           428972.00k
+      Timestamp           02/04/2018 05:27:22 PM
+      Step Count                        583  Switch Count  0
+
+
+2238  data want (keep = id bv:) ;
+2239    if _n_ = 1 then set vmax ;
+2240    array vm v: ;
+2241    set sd1.have ;          *** changed this to d1.have ****;
+2242    array v
+2242! v1- v&Nvar ;
+SYMBOLGEN:  Macro variable NVAR resolves to 50
+2243    array bv
+2243! bv1-bv&Nvar ;
+SYMBOLGEN:  Macro variable NVAR resolves to 50
+2244    do over v ;
+2245      bv = (v = vm or v > 7) ;
+2246    end ;
+2247  run ;
+
+NOTE: There were 1 observations read from the data set WORK.VMAX.
+NOTE: There were 1000000 observations read from the data set SD1.HAVE.
+NOTE: The data set WORK.WANT has 1000000 observations and 51 variables.
+NOTE: DATA statement used (Total process time):
+      real time           2.24 seconds
+      user cpu time       1.68 seconds
+      system cpu time     0.56 seconds
+      memory              1214.96k
+      OS Memory           423832.00k
+      Timestamp           02/04/2018 05:27:25 PM
+      Step Count                        584  Switch Count  0
+
+*___ __  __ _
+|_ _|  \/  | |
+ | || |\/| | |
+ | || |  | | |___
+|___|_|  |_|_____|
+
+;
+
+proc iml;
+varnames = "v1":"v&NVar";
+use sd1.have var varNames;
+   read all var _all_ into X;
+close;
+
+t0 = time();   /* start timer */
+bv = (x=x[,<>] | x>7);
+tElapsed = time()-t0;   /* end timer */
+
+create have2 from bv[colname=varNames];
+   append from bv;
+close;
+
+print tElapsed;
+quit;
+
+ TELAPSED
+
+4.0799999
+
+Closing WORK.HAVE2
+The data set WORK.HAVE2 has 1000000 observations and 50 variables.
+print tElapsed;
+quit;
+Exiting IML.
+PROCEDURE IML used (Total process time):
+real time           7.77 seconds
+user cpu time       5.46 seconds
+system cpu time     2.27 seconds
+memory              1172168.59k
+OS Memory           1195648.00k
+Timestamp           02/04/2018 05:51:48 PM
+Step Count                        599  Switch Count  0
+
+
+
+
+
 
 
 
