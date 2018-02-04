@@ -1,7 +1,7 @@
 Flag max or any value gt 7 for 50 columns
         
   Benchmarks (no parallelization I have slow ddr2 memory)
-  could be cache data I did run twice on each)
+  could have cached data I did run twice on each)
 
    4.03  MEANS - DATASTEP with sasfile (1.77,2.24) CORRECTION
    4.08  IML (just the in memory 'bv = (x=x[,<>] | x>7)' see below;
