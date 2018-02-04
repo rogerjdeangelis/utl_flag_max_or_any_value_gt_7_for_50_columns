@@ -30,7 +30,7 @@ Flag max or any value gt 7 for 50 columns. Keywords: sas sql join merge big data
     https://github.com/rogerjdeangelis/utl_sql_looping_or_using_arrays_in_sql_do_over_macro
 
     For each line and each variable, I want to know if the value is equal to
-    the max for this variable or more than or equal to 7.
+    the max for this variable or greater than 7.
 
 
     INPUT  (real data has 50 variables)
