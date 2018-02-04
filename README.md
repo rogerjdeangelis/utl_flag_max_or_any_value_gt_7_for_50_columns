@@ -2,10 +2,7 @@
 Flag max or any value gt 7 for 50 columns. Keywords: sas sql join merge big data analytics macros oracle teradata mysql sas communities stackoverflow statistics artificial inteligence AI Python R Java Javascript WPS Matlab SPSS Scala Perl C C# Excel MS Access JSON graphics maps NLP natural language processing machine learning igraph DOSUBL DOW loop stackoverfl SAS community.
     Flag max or any value gt 7 for 50 columns
 
-       Two Solutions
-            1. SAS
-            2. WPS/PROC R or SAS/IML/R
-            
+    
     50 vars 1,000,000 obs
     Benchmarks (no parallelization I have slow ddr2 memory)
       could be cache data I did run twice on each)
